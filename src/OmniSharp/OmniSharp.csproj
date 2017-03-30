@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OmniSharp.Cake\OmniSharp.Cake.csproj" />
     <ProjectReference Include="..\OmniSharp.Host\OmniSharp.Host.csproj" />
     <ProjectReference Include="..\OmniSharp.Roslyn.CSharp\OmniSharp.Roslyn.CSharp.csproj" />
     <ProjectReference Include="..\OmniSharp.DotNet\OmniSharp.DotNet.csproj" />
