@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cake.Common" Version="0.19.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OmniSharp.Cake\OmniSharp.Cake.csproj" />
     <ProjectReference Include="..\OmniSharp.Host\OmniSharp.Host.csproj" />
     <ProjectReference Include="..\OmniSharp.Roslyn.CSharp\OmniSharp.Roslyn.CSharp.csproj" />

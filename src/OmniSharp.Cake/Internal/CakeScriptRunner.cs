@@ -128,7 +128,7 @@ namespace OmniSharp.Cake.Internal
         /// <param name="host">The script host.</param>
         /// <param name="scriptPath">The script.</param>
         /// <param name="arguments">The arguments.</param>
-        public ProjectInfo CreateProjectInfo(IScriptHost host, FilePath scriptPath, IDictionary<string, string> arguments)
+        public Tuple<ProjectInfo, string> CreateProjectInfo(IScriptHost host, FilePath scriptPath, IDictionary<string, string> arguments)
         {
             if (host == null)
             {
@@ -221,7 +221,7 @@ namespace OmniSharp.Cake.Internal
             var script = new Script(result.Namespaces, result.Lines, aliases, result.UsingAliases);
             //session.Execute(script);
 
-            return (session as CakeXPlatScriptSession).GetProjectInfo(script);
+            return (session as CakeXPlatScriptSession).GetProjectInfo(script, scriptPath);
         }
 
         private DirectoryPath GetToolPath(DirectoryPath root)

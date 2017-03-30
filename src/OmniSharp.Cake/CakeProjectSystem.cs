@@ -54,29 +54,72 @@ namespace OmniSharp.Cake
 
         public Task<object> GetProjectModelAsync(string filePath)
         {
-            throw new NotImplementedException();
+            var document = _workspace.GetDocument(filePath);
+            var projectFilePath = document != null
+                ? document.Project.FilePath
+                : filePath;
+
+            var projectInfo = GetProjectFileInfo(projectFilePath);
+            if (projectInfo == null)
+            {
+                _logger.LogDebug($"Could not locate project for '{projectFilePath}'");
+                return Task.FromResult<object>(null);
+            }
+
+            return Task.FromResult<object>(new CakeContextModel(filePath, projectInfo, _assemblyReferences));
         }
 
         public Task<object> GetWorkspaceModelAsync(WorkspaceInformationRequest request)
         {
-            throw new NotImplementedException();
+            var cakeContextModels = new List<CakeContextModel>();
+            foreach (var project in _projects)
+            {
+                cakeContextModels.Add(new CakeContextModel(project.Key, project.Value, _assemblyReferences));
+            }
+            return Task.FromResult<object>(new CakeContextModelCollection(cakeContextModels));
         }
 
         public void Initalize(IConfiguration configuration)
         {
-            _logger.LogInformation($"Detecting CSX files in '{_env.Path}'.");
+            _logger.LogInformation($"Detecting build.cake in '{_env.Path}'.");
 
-            // Nothing to do if there are no CSX files
-            var allCakeFiles = Directory.GetFiles(_env.Path, "*.cake", SearchOption.AllDirectories);
-            if (allCakeFiles.Length == 0)
+            // Nothing to do if there is no build.cake
+            var cakePath = System.IO.Path.Combine(_env.Path, "build.cake");
+            if (!File.Exists(cakePath))
             {
-                _logger.LogInformation("Could not find any Cake files");
+                _logger.LogInformation("Could not find build.cake");
                 return;
             }
 
-            _logger.LogInformation($"Found {allCakeFiles.Length} Cake files.");
+            _logger.LogInformation($"Found {cakePath}");
 
+            var projectAndCode = _scriptRunner.CreateProjectInfo(_scripHost, new FilePath(cakePath), new Dictionary<string, string>());
+            var project = projectAndCode.Item1;
+            var code = projectAndCode.Item2;
 
+            // add Cake project to workspace
+            _workspace.AddProject(project);
+            var documentId = DocumentId.CreateNewId(project.Id);
+            var loader = new CakeTextLoader(cakePath, code);
+            var documentInfo = DocumentInfo.Create(documentId, cakePath, filePath: cakePath, loader: loader, sourceCodeKind: SourceCodeKind.Script);
+            _workspace.AddDocument(documentInfo);
+            //_workspace.AddDocument(project.Id, cakePath, SourceCodeKind.Script);
+            _projects[cakePath] = project;
+            _logger.LogInformation($"Added Cake project '{cakePath}' to the workspace.");
+        }
+
+        private ProjectInfo GetProjectFileInfo(string path)
+        {
+            ProjectInfo projectFileInfo;
+            if (!_projects.TryGetValue(path, out projectFileInfo))
+            {
+                if (!_projects.TryGetValue(path.Replace("/","\\"), out projectFileInfo))
+                {
+                    return null;
+                }
+            }
+
+            return projectFileInfo;
         }
     }
 }

@@ -26,6 +26,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
+using Microsoft.CodeAnalysis.Scripting;
+
+using Script = global::Cake.Core.Scripting.Script;
 
 namespace OmniSharp.Cake.Internal
 {
@@ -86,39 +89,79 @@ namespace OmniSharp.Cake.Internal
             }
         }
 
-        public ProjectInfo GetProjectInfo(Script script)
+        public Tuple<ProjectInfo, string> GetProjectInfo(Script script, FilePath scriptPath)
         {
             // Generate the script code.
             var generator = new CakeRoslynCodeGenerator();
             var code = generator.Generate(script);
 
             // Create the script options dynamically.
-            var options = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default
-                .AddImports(Namespaces)
-                .AddReferences(References)
-                .AddReferences(ReferencePaths.Select(r => r.FullPath));
+            //var options = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default
+            //    .AddImports(Namespaces)
+            //    .AddReferences(References)
+            //    .AddReferences(ReferencePaths.Select(r => r.FullPath));
 
-            var roslynScript = CSharpScript.Create(code, options, _host.GetType());
-            var compilation = roslynScript.GetCompilation();
-            compilation = compilation.WithOptions(compilation.Options
-                .WithOptimizationLevel(OptimizationLevel.Debug)
-                .WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
-
+            //var roslynScript = CSharpScript.Create(code, options, _host.GetType());
+            //var compilation = roslynScript.GetCompilation();
+            //compilation = compilation.WithOptions(compilation.Options
+            //    .WithOptimizationLevel(OptimizationLevel.Debug)
+            //    .WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
 
             var project = ProjectInfo.Create(
                 id: ProjectId.CreateNewId(Guid.NewGuid().ToString()),
                 version: VersionStamp.Create(),
                 name: "build.cake",
+                filePath: scriptPath.MakeAbsolute(_host.Context.Environment).ToString(),
                 assemblyName: "build.cake.dll",
                 language: LanguageNames.CSharp,
-                compilationOptions: compilation.Options,
+                compilationOptions: GetCompilationOptions(),
                 parseOptions: new CSharpParseOptions(LanguageVersion.Default, DocumentationMode.Parse, SourceCodeKind.Script),
-                //metadataReferences: Context.CommonReferences.Union(Context.CsxReferences[csxPath]),
+                metadataReferences: GetMetadataReferences(),
                 //projectReferences: Context.CsxLoadReferences[csxPath].Select(p => new ProjectReference(p.Id)),
                 isSubmission: true,
-                hostObjectType: typeof(InteractiveScriptGlobals));
+                hostObjectType: _host.GetType());
 
-            return project;
+            return Tuple.Create(project, code);
+        }
+
+        private IEnumerable<MetadataReference> GetMetadataReferences()
+        {
+            var references = References.Select(r => MetadataReference.CreateFromFile(r.Location)).ToList();
+            references.AddRange(ReferencePaths.Select(r => MetadataReference.CreateFromFile(r.MakeAbsolute(_host.Context.Environment).ToString())));
+            references.Add(MetadataReference.CreateFromFile(typeof(CakeScriptHost).GetTypeInfo().Assembly.Location));
+
+            return references;
+        }
+
+        private CompilationOptions GetCompilationOptions()
+        {
+            var compilationOptions = new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary,
+                usings: Namespaces,
+                allowUnsafe: true,
+                metadataReferenceResolver: new CachingScriptMetadataResolver(),
+                sourceReferenceResolver: ScriptSourceResolver.Default,
+                assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default).
+                WithSpecificDiagnosticOptions(new Dictionary<string, ReportDiagnostic>
+                {
+                    // ensure that specific warnings about assembly references are always suppressed
+                    // https://github.com/dotnet/roslyn/issues/5501
+                    { "CS1701", ReportDiagnostic.Suppress },
+                    { "CS1702", ReportDiagnostic.Suppress },
+                    { "CS1705", ReportDiagnostic.Suppress }
+                });
+
+            var topLevelBinderFlagsProperty = typeof(CSharpCompilationOptions).GetProperty("TopLevelBinderFlags", BindingFlags.Instance | BindingFlags.NonPublic);
+            var binderFlagsType = typeof(CSharpCompilationOptions).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.BinderFlags");
+
+            var ignoreCorLibraryDuplicatedTypesMember = binderFlagsType?.GetField("IgnoreCorLibraryDuplicatedTypes", BindingFlags.Static | BindingFlags.Public);
+            var ignoreCorLibraryDuplicatedTypesValue = ignoreCorLibraryDuplicatedTypesMember?.GetValue(null);
+            if (ignoreCorLibraryDuplicatedTypesValue != null)
+            {
+                topLevelBinderFlagsProperty?.SetValue(compilationOptions, ignoreCorLibraryDuplicatedTypesValue);
+            }
+
+            return compilationOptions;
         }
 
         public void Execute(Script script)

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OmniSharp": {
+      "commandName": "Project",
+      "commandLineArgs": "-v -s \"C:\\Users\\mb\\src\\cake-vscode-debug-example\""
+    }
+  }
+}
