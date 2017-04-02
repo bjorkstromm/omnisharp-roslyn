@@ -8,9 +8,9 @@ using Cake.Core.Scripting.CodeGen;
 
 namespace Cake.OmniSharp.Scripting
 {
-    internal sealed class CakeRoslynCodeGenerator
+    internal static class RoslynCodeGenerator
     {
-        public string Generate(Script script)
+        public static string Generate(Script script)
         {
             var usingDirectives = string.Join("\r\n", script.UsingAliasDirectives);
             var aliases = GetAliasCode(script);

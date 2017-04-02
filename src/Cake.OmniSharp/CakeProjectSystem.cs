@@ -16,6 +16,11 @@ using Cake.OmniSharp.Reflection;
 using Cake.OmniSharp.Configuration;
 using OmniSharp;
 using Cake.OmniSharp.Scripting;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Scripting;
+using System.Reflection;
+using Cake.Core.Scripting;
+using Cake.OmniSharp.Diagnostics;
 
 namespace Cake.OmniSharp
 {
@@ -37,8 +42,7 @@ namespace Cake.OmniSharp
         private readonly ILogger _logger;
 
         private readonly ICakeContext _cakeContext;
-        private readonly CakeScriptRunner _scriptRunner;
-        private readonly CakeScriptHost _scripHost;
+        private readonly CakeScriptGenerator _generator;
 
         [ImportingConstructor]
         public CakeProjectSystem(OmniSharpWorkspace workspace, IOmniSharpEnvironment env, ILoggerFactory loggerFactory, IMetadataFileReferenceCache metadataFileReferenceCache)
@@ -49,9 +53,23 @@ namespace Cake.OmniSharp
             _logger = loggerFactory.CreateLogger<CakeProjectSystem>();
             _projects = new Dictionary<string, ProjectInfo>();
 
-            _cakeContext = CakeContextFactory.CreateContext(_logger);
-            _scripHost = new CakeScriptHost(_cakeContext);
-            _scriptRunner = new CakeScriptRunner(_cakeContext);
+            var log = new CakeLog(_logger);
+            var cakePlatform = new CakePlatform();
+            var cakeRuntime = new CakeRuntime();
+            var environment = new CakeEnvironment(cakePlatform, cakeRuntime, log);
+            var fileSystem = new FileSystem();
+            var globber = new Globber(fileSystem, environment);
+            _generator = CakeScriptGenerator.Create(environment, fileSystem, globber, log);
+
+            _workspace.WorkspaceChanged += _workspace_WorkspaceChanged;
+        }
+
+        private void _workspace_WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
+        {
+            if(e.Kind == WorkspaceChangeKind.DocumentChanged)
+            {
+                _logger.LogDebug($"Document {e.DocumentId} changed");
+            }
         }
 
         public Task<object> GetProjectModelAsync(string filePath)
@@ -83,31 +101,64 @@ namespace Cake.OmniSharp
 
         public void Initalize(IConfiguration configuration)
         {
-            _logger.LogInformation($"Detecting build.cake in '{_env.Path}'.");
+            _logger.LogInformation($"Detecting Cake files in '{_env.Path}'.");
 
-            // Nothing to do if there is no build.cake
-            var cakePath = System.IO.Path.Combine(_env.Path, "build.cake");
-            if (!File.Exists(cakePath))
+            // Nothing to do if there are no Cake files
+            var allCakeFiles = Directory.GetFiles(_env.Path, "*.cake", SearchOption.AllDirectories);
+            if (allCakeFiles.Length == 0)
             {
-                _logger.LogInformation("Could not find build.cake");
+                _logger.LogInformation("Could not find any Cake files");
                 return;
             }
 
-            _logger.LogInformation($"Found {cakePath}");
+            _logger.LogInformation($"Found {allCakeFiles.Length} Cake files.");
 
-            var projectAndCode = _scriptRunner.CreateProjectInfo(_scripHost, new FilePath(cakePath), new Dictionary<string, string>());
-            var project = projectAndCode.Item1;
-            var code = projectAndCode.Item2;
+            foreach (var cakePath in allCakeFiles)
+            {
+                try
+                {
+                    var cakeScript = _generator.GetCakeScript(new FilePath(cakePath));
+                    var project = GetProject(cakeScript, cakePath);
 
-            // add Cake project to workspace
-            _workspace.AddProject(project);
-            var documentId = DocumentId.CreateNewId(project.Id);
-            var loader = new CakeTextLoader(cakePath, code);
-            var documentInfo = DocumentInfo.Create(documentId, cakePath, filePath: cakePath, loader: loader, sourceCodeKind: SourceCodeKind.Script);
-            _workspace.AddDocument(documentInfo);
-            //_workspace.AddDocument(project.Id, cakePath, SourceCodeKind.Script);
-            _projects[cakePath] = project;
-            _logger.LogInformation($"Added Cake project '{cakePath}' to the workspace.");
+                    // add Cake project to workspace
+                    _workspace.AddProject(project);
+                    var documentId = DocumentId.CreateNewId(project.Id);
+                    var loader = new CakeScriptLoader(cakePath, _generator);
+                    var documentInfo = DocumentInfo.Create(
+                        documentId,
+                        cakePath,
+                        filePath: cakePath, 
+                        loader: loader, 
+                        sourceCodeKind: SourceCodeKind.Script);
+
+                    _workspace.AddDocument(documentInfo);
+                    _projects[cakePath] = project;
+                    _logger.LogInformation($"Added Cake project '{cakePath}' to the workspace.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"{cakePath} will be ignored due to an following error");
+                }
+            }
+        }
+
+        private ProjectInfo GetProject(CakeScript cakeScript, string filePath)
+        {
+            var name = System.IO.Path.GetFileName(filePath);
+
+            return ProjectInfo.Create(
+                id: ProjectId.CreateNewId(Guid.NewGuid().ToString()),
+                version: VersionStamp.Create(),
+                name: name,
+                filePath: filePath,
+                assemblyName: $"{name}.dll",
+                language: LanguageNames.CSharp,
+                compilationOptions: GetCompilationOptions(cakeScript.Usings),
+                parseOptions: new CSharpParseOptions(LanguageVersion.Default, DocumentationMode.Parse, SourceCodeKind.Script),
+                metadataReferences: cakeScript.MetadataReferences,
+                //projectReferences: ,
+                isSubmission: true,
+                hostObjectType: typeof(IScriptHost));
         }
 
         private ProjectInfo GetProjectFileInfo(string path)
@@ -115,13 +166,41 @@ namespace Cake.OmniSharp
             ProjectInfo projectFileInfo;
             if (!_projects.TryGetValue(path, out projectFileInfo))
             {
-                if (!_projects.TryGetValue(path.Replace("/","\\"), out projectFileInfo))
-                {
-                    return null;
-                }
+                return null;
             }
 
             return projectFileInfo;
+        }
+
+        private CompilationOptions GetCompilationOptions(IEnumerable<string> usings)
+        {
+            var compilationOptions = new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary,
+                usings: usings,
+                allowUnsafe: true,
+                metadataReferenceResolver: new CachingScriptMetadataResolver(),
+                sourceReferenceResolver: ScriptSourceResolver.Default,
+                assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default).
+                WithSpecificDiagnosticOptions(new Dictionary<string, ReportDiagnostic>
+                {
+                    // ensure that specific warnings about assembly references are always suppressed
+                    // https://github.com/dotnet/roslyn/issues/5501
+                    { "CS1701", ReportDiagnostic.Suppress },
+                    { "CS1702", ReportDiagnostic.Suppress },
+                    { "CS1705", ReportDiagnostic.Suppress }
+                });
+
+            var topLevelBinderFlagsProperty = typeof(CSharpCompilationOptions).GetProperty("TopLevelBinderFlags", BindingFlags.Instance | BindingFlags.NonPublic);
+            var binderFlagsType = typeof(CSharpCompilationOptions).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.BinderFlags");
+
+            var ignoreCorLibraryDuplicatedTypesMember = binderFlagsType?.GetField("IgnoreCorLibraryDuplicatedTypes", BindingFlags.Static | BindingFlags.Public);
+            var ignoreCorLibraryDuplicatedTypesValue = ignoreCorLibraryDuplicatedTypesMember?.GetValue(null);
+            if (ignoreCorLibraryDuplicatedTypesValue != null)
+            {
+                topLevelBinderFlagsProperty?.SetValue(compilationOptions, ignoreCorLibraryDuplicatedTypesValue);
+            }
+
+            return compilationOptions;
         }
     }
 }

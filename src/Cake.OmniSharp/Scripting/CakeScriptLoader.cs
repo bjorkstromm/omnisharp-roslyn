@@ -1,8 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.CodeAnalysis.Text;
@@ -10,20 +7,16 @@ using System.IO;
 
 namespace Cake.OmniSharp.Scripting
 {
-    class CakeTextLoader : TextLoader
+    class CakeScriptLoader : TextLoader
     {
         private readonly string _filePath;
-        private readonly string _code;
+        private readonly CakeScriptGenerator _generator;
 
-        public CakeTextLoader(string filePath, string code)
+        public CakeScriptLoader(string filePath, CakeScriptGenerator generator)
         {
             if (filePath == null)
             {
                 throw new ArgumentNullException(nameof(filePath));
-            }
-            if (string.IsNullOrEmpty(code))
-            {
-                throw new ArgumentNullException(nameof(code));
             }
 
             if (!Path.IsPathRooted(filePath))
@@ -31,8 +24,8 @@ namespace Cake.OmniSharp.Scripting
                 throw new ArgumentException("Expected an absolute file path", nameof(filePath));
             }
 
-            this._filePath = filePath;
-            this._code = code;
+            _filePath = filePath;
+            _generator = generator ?? throw new ArgumentNullException(nameof(generator));
         }
 
         public override Task<TextAndVersion> LoadTextAndVersionAsync(Workspace workspace, DocumentId documentId, CancellationToken cancellationToken)
@@ -41,12 +34,11 @@ namespace Cake.OmniSharp.Scripting
 
             TextAndVersion textAndVersion;
 
-            //using (var stream = File.OpenRead(_filePath))
-            //{
-                var version = VersionStamp.Create(prevLastWriteTime);
-                var text = SourceText.From(_code);
-                textAndVersion = TextAndVersion.Create(text, version, _filePath);
-            //}
+            var script = _generator.GetCakeScript(_filePath);
+            var code = RoslynCodeGenerator.Generate(script.Script);
+            var version = VersionStamp.Create(prevLastWriteTime);
+            var text = SourceText.From(code);
+            textAndVersion = TextAndVersion.Create(text, version, _filePath);
 
             var newLastWriteTime = File.GetLastWriteTimeUtc(_filePath);
             if (!newLastWriteTime.Equals(prevLastWriteTime))
