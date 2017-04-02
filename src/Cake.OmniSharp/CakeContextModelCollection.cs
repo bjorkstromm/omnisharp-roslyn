@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OmniSharp.Cake
+namespace Cake.OmniSharp
 {
     public class CakeContextModelCollection
     {

@@ -9,7 +9,7 @@ using System.Runtime.Loader;
 using Cake.Core.IO;
 using Microsoft.Extensions.DependencyModel;
 
-namespace OmniSharp.Cake.Core.Reflection
+namespace Cake.OmniSharp.Reflection
 {
     internal class CakeAssemblyLoadContext : AssemblyLoadContext
     {

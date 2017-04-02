@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace OmniSharp.Cake
+namespace Cake.OmniSharp
 {
     public class CakeContextModel
     {

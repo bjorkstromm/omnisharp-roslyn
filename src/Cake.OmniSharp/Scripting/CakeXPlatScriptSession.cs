@@ -29,8 +29,9 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 
 using Script = global::Cake.Core.Scripting.Script;
+using Cake.OmniSharp.Scripting;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Internal
 {
     internal sealed class CakeXPlatScriptSession : IScriptSession
     {

@@ -6,9 +6,9 @@ using System;
 using System.Reflection;
 using Cake.Core.IO;
 using Cake.Core.Reflection;
-using OmniSharp.Cake.Core.Polyfill;
+using Cake.OmniSharp.Polyfill;
 
-namespace OmniSharp.Cake.Core.Reflection
+namespace Cake.OmniSharp.Reflection
 {
     internal sealed class AssemblyLoader : IAssemblyLoader
     {

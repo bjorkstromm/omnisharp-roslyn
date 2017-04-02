@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Cake.Core.IO;
 using Cake.Core.Packaging;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp
 {
     public class CakePackageInstaller : IPackageInstaller
     {

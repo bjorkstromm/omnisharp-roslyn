@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 
 // ReSharper disable once CheckNamespace
-namespace OmniSharp.Cake.Internal.Extensions
+namespace Cake.OmniSharp.Extensions
 {
     internal static class HashSetExtensions
     {

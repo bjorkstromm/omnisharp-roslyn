@@ -8,7 +8,7 @@ using Cake.Core.Configuration;
 using Cake.Core.Diagnostics;
 using Cake.Core;
 
-namespace OmniSharp.Cake.Core.Reflection
+namespace Cake.OmniSharp.Reflection
 {
     internal sealed class AssemblyVerifier
     {

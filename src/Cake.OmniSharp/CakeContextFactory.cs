@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using Cake.Core;
 using Microsoft.Extensions.Logging;
 using Cake.Core.IO;
-using OmniSharp.Cake.Core.Configuration;
-using OmniSharp.Cake.Core.Reflection;
+using Cake.OmniSharp.Configuration;
+using Cake.OmniSharp.Reflection;
 using Cake.Core.Tooling;
+using Cake.OmniSharp.Diagnostics;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp
 {
     internal static class CakeContextFactory
     {

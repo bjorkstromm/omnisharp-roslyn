@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Cake.Core.Scripting;
 using Cake.Core.Scripting.CodeGen;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Scripting
 {
     internal sealed class CakeRoslynCodeGenerator
     {

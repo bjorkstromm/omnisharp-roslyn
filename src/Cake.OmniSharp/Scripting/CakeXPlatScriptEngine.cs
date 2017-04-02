@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using Cake.Core.Diagnostics;
 using Cake.Core.Reflection;
 using Cake.Core.Scripting;
+using Cake.OmniSharp.Internal;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Scripting
 {
     internal sealed class CakeXPlatScriptEngine : IScriptEngine
     {

@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp
 {
     public class CachingScriptMetadataResolver : MetadataReferenceResolver
     {

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace OmniSharp.Cake.Core
+namespace Cake.OmniSharp
 {
     internal static class Constants
     {

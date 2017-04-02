@@ -7,9 +7,9 @@ using System.Reflection;
 using Cake.Core.IO;
 using Cake.Core.Reflection;
 using Cake.Core;
-using OmniSharp.Cake.Core.Reflection;
+using Cake.OmniSharp.Reflection;
 
-namespace OmniSharp.Cake.Core.Polyfill
+namespace Cake.OmniSharp.Polyfill
 {
     internal static class AssemblyHelper
     {

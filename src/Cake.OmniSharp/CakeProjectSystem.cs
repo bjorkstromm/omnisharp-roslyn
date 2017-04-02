@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using System.IO;
-using OmniSharp.Cake.Internal;
+using Cake.OmniSharp;
 using Cake.Core.Diagnostics;
 using Cake.Core;
 using Cake.Core.IO;
-using OmniSharp.Cake.Core.Reflection;
-using OmniSharp.Cake.Core.Configuration;
+using Cake.OmniSharp.Reflection;
+using Cake.OmniSharp.Configuration;
+using OmniSharp;
+using Cake.OmniSharp.Scripting;
 
-namespace OmniSharp.Cake
+namespace Cake.OmniSharp
 {
     [Export(typeof(IProjectSystem)), Shared]
     public class CakeProjectSystem : IProjectSystem

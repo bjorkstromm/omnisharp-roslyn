@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using LogLevel = Cake.Core.Diagnostics.LogLevel;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Diagnostics
 {
     class CakeLog : ICakeLog
     {

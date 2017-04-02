@@ -60,7 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.DotNetTest.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.DotNet.Tests", "tests\OmniSharp.DotNet.Tests\OmniSharp.DotNet.Tests.csproj", "{A645D475-3448-4473-88CA-E3C3B31E33CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniSharp.Cake", "src\OmniSharp.Cake\OmniSharp.Cake.csproj", "{983424A5-9BF1-440B-B376-44F11B7DBA1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.OmniSharp", "src\Cake.OmniSharp\Cake.OmniSharp.csproj", "{983424A5-9BF1-440B-B376-44F11B7DBA1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

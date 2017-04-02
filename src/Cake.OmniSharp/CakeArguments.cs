@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Cake.Core;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp
 {
     class CakeArguments : ICakeArguments
     {

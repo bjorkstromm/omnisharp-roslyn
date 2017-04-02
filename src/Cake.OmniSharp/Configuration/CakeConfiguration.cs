@@ -6,7 +6,7 @@ using Cake.Core.Configuration;
 using System;
 using System.Collections.Generic;
 
-namespace OmniSharp.Cake.Core.Configuration
+namespace Cake.OmniSharp.Configuration
 {
     internal sealed class CakeConfiguration : ICakeConfiguration
     {

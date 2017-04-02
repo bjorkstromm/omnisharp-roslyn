@@ -8,7 +8,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis.Text;
 using System.IO;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Scripting
 {
     class CakeTextLoader : TextLoader
     {

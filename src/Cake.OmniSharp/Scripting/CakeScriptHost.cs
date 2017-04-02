@@ -6,7 +6,7 @@ using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Core.Scripting;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Scripting
 {
     /// <summary>
     /// The script host used to execute Cake scripts.

@@ -14,12 +14,13 @@ using Cake.Core.Reflection;
 using Cake.Core.Scripting;
 using Cake.Core.Scripting.Analysis;
 using Microsoft.CodeAnalysis;
-using OmniSharp.Cake.Internal.Extensions;
-using OmniSharp.Cake.Core.Configuration;
-using OmniSharp.Cake.Core.Reflection;
+using Cake.OmniSharp.Extensions;
+using Cake.OmniSharp.Configuration;
+using Cake.OmniSharp.Reflection;
 using Cake.Core.Tooling;
+using Cake.OmniSharp.Internal;
 
-namespace OmniSharp.Cake.Internal
+namespace Cake.OmniSharp.Scripting
 {
     /// <summary>
     /// Responsible for running scripts.
