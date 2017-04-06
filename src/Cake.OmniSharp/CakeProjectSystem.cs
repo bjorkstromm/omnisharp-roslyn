@@ -21,6 +21,9 @@ using Microsoft.CodeAnalysis.Scripting;
 using System.Reflection;
 using Cake.Core.Scripting;
 using Cake.OmniSharp.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
 
 namespace Cake.OmniSharp
 {
@@ -43,6 +46,7 @@ namespace Cake.OmniSharp
 
         private readonly ICakeContext _cakeContext;
         private readonly CakeScriptGenerator _generator;
+        private readonly ConcurrentDictionary<DocumentId, ImmutableArray<byte>> _documentChecksums;
 
         [ImportingConstructor]
         public CakeProjectSystem(OmniSharpWorkspace workspace, IOmniSharpEnvironment env, ILoggerFactory loggerFactory, IMetadataFileReferenceCache metadataFileReferenceCache)
@@ -52,6 +56,7 @@ namespace Cake.OmniSharp
             _env = env;
             _logger = loggerFactory.CreateLogger<CakeProjectSystem>();
             _projects = new Dictionary<string, ProjectInfo>();
+            _documentChecksums = new ConcurrentDictionary<DocumentId, ImmutableArray<byte>>();
 
             var log = new CakeLog(_logger);
             var cakePlatform = new CakePlatform();
@@ -69,6 +74,23 @@ namespace Cake.OmniSharp
             if(e.Kind == WorkspaceChangeKind.DocumentChanged)
             {
                 _logger.LogDebug($"Document {e.DocumentId} changed");
+                var document = _workspace.CurrentSolution.GetDocument(e.DocumentId);
+                var sourceText = document.GetTextAsync().GetAwaiter().GetResult();
+
+                if(_documentChecksums.TryGetValue(e.DocumentId, out ImmutableArray<byte> sum) && sum == sourceText.GetChecksum())
+                {
+                    return;
+                }
+
+                var script = _generator.GetCakeScript(new FilePath(document.FilePath));
+                var code = RoslynCodeGenerator.Generate(script.Script, sourceText.ToString());
+
+                sourceText = SourceText.From(code);
+
+                var checksum = sourceText.GetChecksum();
+                _documentChecksums.AddOrUpdate(e.DocumentId, checksum, (k, o) => checksum);
+
+                _workspace.OnDocumentChanged(e.DocumentId, sourceText);
             }
         }
 

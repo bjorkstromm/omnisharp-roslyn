@@ -18,6 +18,14 @@ namespace Cake.OmniSharp.Scripting
             return string.Join("\r\n", usingDirectives, aliases, code);
         }
 
+        public static string Generate(Script script, string code)
+        {
+            var usingDirectives = string.Join("\r\n", script.UsingAliasDirectives);
+            var aliases = GetAliasCode(script);
+            code = script.Lines[0] + "\r\n" + code;
+            return string.Join("\r\n", usingDirectives, aliases, code);
+        }
+
         private static string GetAliasCode(Script context)
         {
             var result = new List<string>();
