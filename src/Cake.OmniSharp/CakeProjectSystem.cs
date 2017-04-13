@@ -31,7 +31,7 @@ namespace Cake.OmniSharp
     public class CakeProjectSystem : IProjectSystem
     {
         public string Key => "Cake";
-        public string Language => LanguageNames.CSharp;
+        public string Language => Constants.LanguageNames.Cake;//LanguageNames.CSharp;
         public IEnumerable<string> Extensions => new[] { ".cake" };
 
         private readonly IMetadataFileReferenceCache _metadataFileReferenceCache;

@@ -20,5 +20,10 @@ namespace Cake.OmniSharp
             public const string Tools = "Paths_Tools";
             public const string Addins = "Paths_Addins";
         }
+
+        public static class LanguageNames
+        {
+            public const string Cake = "Cake";
+        }
     }
 }
