@@ -45,11 +45,11 @@ namespace Cake.OmniSharp
         private readonly ILogger _logger;
 
         private readonly ICakeContext _cakeContext;
-        private readonly CakeScriptGenerator _generator;
+        private readonly ICakeScriptGenerator _generator;
         private readonly ConcurrentDictionary<DocumentId, ImmutableArray<byte>> _documentChecksums;
 
         [ImportingConstructor]
-        public CakeProjectSystem(OmniSharpWorkspace workspace, IOmniSharpEnvironment env, ILoggerFactory loggerFactory, IMetadataFileReferenceCache metadataFileReferenceCache)
+        public CakeProjectSystem(OmniSharpWorkspace workspace, IOmniSharpEnvironment env, ILoggerFactory loggerFactory, IMetadataFileReferenceCache metadataFileReferenceCache, ICakeScriptGenerator generator)
         {
             _metadataFileReferenceCache = metadataFileReferenceCache;
             _workspace = workspace;
@@ -64,7 +64,7 @@ namespace Cake.OmniSharp
             var environment = new CakeEnvironment(cakePlatform, cakeRuntime, log);
             var fileSystem = new FileSystem();
             var globber = new Globber(fileSystem, environment);
-            _generator = CakeScriptGenerator.Create(environment, fileSystem, globber, log);
+            _generator = generator;
 
             _workspace.WorkspaceChanged += _workspace_WorkspaceChanged;
         }
@@ -82,7 +82,7 @@ namespace Cake.OmniSharp
                     return;
                 }
 
-                var script = _generator.GetCakeScript(new FilePath(document.FilePath));
+                var script = _generator.Generate(new FilePath(document.FilePath));
                 var code = RoslynCodeGenerator.Generate(script.Script, sourceText.ToString());
 
                 sourceText = SourceText.From(code);
@@ -139,7 +139,7 @@ namespace Cake.OmniSharp
             {
                 try
                 {
-                    var cakeScript = _generator.GetCakeScript(new FilePath(cakePath));
+                    var cakeScript = _generator.Generate(new FilePath(cakePath));
                     var project = GetProject(cakeScript, cakePath);
 
                     // add Cake project to workspace

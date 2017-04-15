@@ -17,10 +17,14 @@ using Cake.Core.IO;
 using System.Reflection;
 using Cake.OmniSharp.Extensions;
 using Microsoft.CodeAnalysis;
+using System.Composition;
+using Microsoft.Extensions.Logging;
+using Cake.OmniSharp.Diagnostics;
 
 namespace Cake.OmniSharp.Scripting
 {
-    internal class CakeScriptGenerator
+    [Export, Shared]
+    public class CakeScriptGenerator : ICakeScriptGenerator
     {
         private readonly IFileSystem _fileSystem;
         private readonly ICakeEnvironment _environment;
@@ -31,6 +35,42 @@ namespace Cake.OmniSharp.Scripting
         private readonly IScriptProcessor _processor;
         private readonly IScriptConventions _conventions;
         private readonly IAssemblyLoader _assemblyLoader;
+
+        [ImportingConstructor]
+        public CakeScriptGenerator(ILoggerFactory loggerFactory)
+        {
+            // Log
+            _log = new CakeLog(loggerFactory.CreateLogger<CakeProjectSystem>());
+
+            // Environment
+            var cakePlatform = new CakePlatform();
+            var cakeRuntime = new CakeRuntime();
+            _environment = new CakeEnvironment(cakePlatform, cakeRuntime, _log);
+
+            // Filesystem
+            _fileSystem = new FileSystem();
+
+            // Assemblyloader
+            var configuration = new CakeConfiguration(new Dictionary<string, string>());
+            var assemblyVerifier = new AssemblyVerifier(configuration, _log);
+            _assemblyLoader = new AssemblyLoader(_fileSystem, assemblyVerifier);
+
+            // Aliasfinder
+            _aliasFinder = new ScriptAliasFinder(_log);
+
+            // Analyzer
+            _analyzer = new ScriptAnalyzer(_fileSystem, _environment, _log, null);
+
+            // Processor
+            var toolRepository = new ToolRepository(_environment);
+            var globber = new Globber(_fileSystem, _environment);
+            var toolResolutionStrategy = new ToolResolutionStrategy(_fileSystem, _environment, globber, configuration);
+            var toolLocator = new ToolLocator(_environment, toolRepository, toolResolutionStrategy);
+            _processor = new ScriptProcessor(_fileSystem, _environment, _log, toolLocator, new[] { new CakePackageInstaller() });
+
+            // Conventions
+            _conventions = new ScriptConventions(_fileSystem, _assemblyLoader, _log);
+        }
 
         public CakeScriptGenerator(
             IFileSystem fileSystem,
@@ -54,23 +94,21 @@ namespace Cake.OmniSharp.Scripting
             _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         }
 
-        public static CakeScriptGenerator Create(ICakeEnvironment environment, IFileSystem fileSystem, IGlobber globber, ICakeLog log)
+        public CakeScript Generate(string text, DirectoryPath scriptDirectory)
         {
-            var configuration = new CakeConfiguration(new Dictionary<string, string>());
-            var assemblyVerifier = new AssemblyVerifier(configuration, log);
-            var loader = new AssemblyLoader(fileSystem, assemblyVerifier);
-            var aliasFinder = new ScriptAliasFinder(log);
-            var analyzer = new ScriptAnalyzer(fileSystem, environment, log, null);
-            var toolRepository  = new ToolRepository(environment);
-            var toolResolutionStrategy = new ToolResolutionStrategy(fileSystem, environment, globber, configuration);
-            var toolLocator = new ToolLocator(environment, toolRepository, toolResolutionStrategy);
-            var processor = new ScriptProcessor(fileSystem, environment, log, toolLocator, new[] { new CakePackageInstaller() });
-            var conventions = new ScriptConventions(fileSystem, loader, log);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+            if (scriptDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(scriptDirectory));
+            }
 
-            return new CakeScriptGenerator(fileSystem, environment, log, configuration, aliasFinder, analyzer, processor, conventions, loader);
+
         }
 
-        public CakeScript GetCakeScript(FilePath scriptPath)
+        public CakeScript Generate(FilePath scriptPath)
         {
             if (scriptPath == null)
             {

@@ -10,9 +10,9 @@ namespace Cake.OmniSharp.Scripting
     class CakeScriptLoader : TextLoader
     {
         private readonly string _filePath;
-        private readonly CakeScriptGenerator _generator;
+        private readonly ICakeScriptGenerator _generator;
 
-        public CakeScriptLoader(string filePath, CakeScriptGenerator generator)
+        public CakeScriptLoader(string filePath, ICakeScriptGenerator generator)
         {
             if (filePath == null)
             {
@@ -34,7 +34,7 @@ namespace Cake.OmniSharp.Scripting
 
             TextAndVersion textAndVersion;
 
-            var script = _generator.GetCakeScript(_filePath);
+            var script = _generator.Generate(_filePath);
             var code = RoslynCodeGenerator.Generate(script.Script);
             var version = VersionStamp.Create(prevLastWriteTime);
             var text = SourceText.From(code);
