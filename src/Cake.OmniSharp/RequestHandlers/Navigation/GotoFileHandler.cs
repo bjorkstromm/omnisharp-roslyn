@@ -6,13 +6,13 @@ using OmniSharp.Roslyn.CSharp.Services.Navigation;
 
 namespace Cake.OmniSharp.RequestHandlers.Navigation
 {
-    [OmniSharpHandler(OmnisharpEndpoints.GotoFile, Constants.LanguageNames.Cake)]
-    public class GotoFileHandler : CakeRequestHandler<GotoFileService, GotoFileRequest, QuickFixResponse>
+    [OmniSharpHandler(OmnisharpEndpoints.GotoFile, Constants.LanguageNames.Cake), Shared]
+    public class GotoFileHandler : CakeRequestHandler<GotoFileRequest, QuickFixResponse>
     {
         [ImportingConstructor]
         public GotoFileHandler(
             OmniSharpWorkspace workspace)
-            : base(workspace, new GotoFileService(workspace))
+            : base(workspace)
         {
         }
     }

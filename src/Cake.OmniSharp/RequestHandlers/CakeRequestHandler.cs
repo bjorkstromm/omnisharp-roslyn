@@ -9,28 +9,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using System.Composition.Hosting;
+using OmniSharp.Models;
+using Cake.Core.IO;
 
 namespace Cake.OmniSharp.RequestHandlers
 {
-    public abstract class CakeRequestHandler<TService, TRequest, TResponse> : RequestHandler<TRequest, TResponse>
-        where TService : RequestHandler<TRequest, TResponse>
-    {
-        public OmniSharpWorkspace Workspace { get; private set; }
-        public TService Service { get; private set; }
-
-        protected CakeRequestHandler(OmniSharpWorkspace workspace, TService service)
-        {
-            Workspace = workspace;
-            Service = service;
-        }
-
-        public virtual Task<TResponse> Handle(TRequest request)
-        {
-            // TODO: Position translation
-            return Service.Handle(request);
-        }
-    }
-
     public abstract class CakeRequestHandler<TRequest, TResponse> : RequestHandler<TRequest, TResponse>
     {
         private string _endpointName;
@@ -52,7 +35,9 @@ namespace Cake.OmniSharp.RequestHandlers
         public OmniSharpWorkspace Workspace { get; private set; }
         public Lazy<RequestHandler<TRequest, TResponse>> Service { get; private set; }
 
-        protected CakeRequestHandler(OmniSharpWorkspace workspace)
+        private bool _translateResponse;
+
+        protected CakeRequestHandler(OmniSharpWorkspace workspace, bool translateResponse = true)
         {
             Workspace = workspace;
             Service = new Lazy<RequestHandler<TRequest, TResponse>>(() =>
@@ -62,9 +47,11 @@ namespace Cake.OmniSharp.RequestHandlers
                     s.Metadata.Language.Equals(LanguageNames.CSharp, StringComparison.Ordinal))?.Value 
                     as RequestHandler<TRequest, TResponse>;
             });
+
+            _translateResponse = translateResponse;
         }
 
-        public virtual Task<TResponse> Handle(TRequest request)
+        public virtual async Task<TResponse> Handle(TRequest req)
         {
             var service = Service.Value;
             if(service == null)
@@ -72,7 +59,43 @@ namespace Cake.OmniSharp.RequestHandlers
                 throw new NotSupportedException();
             }
 
-            return service.Handle(request);
+            // Translate if possible
+            int offset = 0;
+            var request = req as Request;
+            if (request != null)
+            {
+                if (request.FileName == null)
+                {
+                    return default(TResponse);
+                }
+
+                var document = Workspace.GetDocument(request.FileName);
+                if (document == null)
+                {
+                    return default(TResponse);
+                }
+
+                var filePath = new FilePath(request.FileName);
+                var sourceText = await document.GetTextAsync();
+
+                offset = sourceText.Lines.FirstOrDefault(line => line.ToString().Equals($"#line 1 \"{filePath.FullPath}\"")).LineNumber + 1;
+
+                request.Line += offset;
+            }
+
+            var res = await service.Handle(req);
+
+            if(_translateResponse && res is QuickFixResponse)
+            {
+                var response = res as QuickFixResponse;
+
+                foreach(var fix in response.QuickFixes)
+                {
+                    fix.Line -= offset;
+                }
+            }
+
+            return res;
         }
     }
 }

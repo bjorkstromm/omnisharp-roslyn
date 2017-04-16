@@ -6,12 +6,12 @@ using OmniSharp.Roslyn.CSharp.Services.Navigation;
 
 namespace Cake.OmniSharp.RequestHandlers.Navigation
 {
-    [OmniSharpHandler(OmnisharpEndpoints.FindImplementations, Constants.LanguageNames.Cake)]
-    public class FindImplementationsHandler : CakeRequestHandler<FindImplementationsService, FindImplementationsRequest, QuickFixResponse>
+    [OmniSharpHandler(OmnisharpEndpoints.FindImplementations, Constants.LanguageNames.Cake), Shared]
+    public class FindImplementationsHandler : CakeRequestHandler<FindImplementationsRequest, QuickFixResponse>
     {
         [ImportingConstructor]
         public FindImplementationsHandler(OmniSharpWorkspace workspace) 
-            : base(workspace, new FindImplementationsService(workspace))
+            : base(workspace)
         {
         }
     }

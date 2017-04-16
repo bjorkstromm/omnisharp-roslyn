@@ -57,13 +57,6 @@ namespace Cake.OmniSharp
             _logger = loggerFactory.CreateLogger<CakeProjectSystem>();
             _projects = new Dictionary<string, ProjectInfo>();
             _documentChecksums = new ConcurrentDictionary<DocumentId, ImmutableArray<byte>>();
-
-            var log = new CakeLog(_logger);
-            var cakePlatform = new CakePlatform();
-            var cakeRuntime = new CakeRuntime();
-            var environment = new CakeEnvironment(cakePlatform, cakeRuntime, log);
-            var fileSystem = new FileSystem();
-            var globber = new Globber(fileSystem, environment);
             _generator = generator;
 
             _workspace.WorkspaceChanged += _workspace_WorkspaceChanged;

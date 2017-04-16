@@ -23,7 +23,7 @@ using Cake.OmniSharp.Diagnostics;
 
 namespace Cake.OmniSharp.Scripting
 {
-    [Export, Shared]
+    [Export(typeof(ICakeScriptGenerator)), Shared]
     public class CakeScriptGenerator : ICakeScriptGenerator
     {
         private readonly IFileSystem _fileSystem;
@@ -37,10 +37,13 @@ namespace Cake.OmniSharp.Scripting
         private readonly IAssemblyLoader _assemblyLoader;
 
         [ImportingConstructor]
-        public CakeScriptGenerator(ILoggerFactory loggerFactory)
+        public CakeScriptGenerator(ILoggerFactory loggerFactory, IFileSystem fileSystem)
         {
             // Log
             _log = new CakeLog(loggerFactory.CreateLogger<CakeProjectSystem>());
+
+            // Configuration
+            _configuration = new CakeConfiguration(new Dictionary<string, string>());
 
             // Environment
             var cakePlatform = new CakePlatform();
@@ -48,7 +51,7 @@ namespace Cake.OmniSharp.Scripting
             _environment = new CakeEnvironment(cakePlatform, cakeRuntime, _log);
 
             // Filesystem
-            _fileSystem = new FileSystem();
+            _fileSystem = fileSystem;
 
             // Assemblyloader
             var configuration = new CakeConfiguration(new Dictionary<string, string>());
@@ -92,20 +95,6 @@ namespace Cake.OmniSharp.Scripting
             _processor = processor ?? throw new ArgumentNullException(nameof(processor));
             _conventions = conventions ?? throw new ArgumentNullException(nameof(conventions));
             _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
-        }
-
-        public CakeScript Generate(string text, DirectoryPath scriptDirectory)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-            if (scriptDirectory == null)
-            {
-                throw new ArgumentNullException(nameof(scriptDirectory));
-            }
-
-
         }
 
         public CakeScript Generate(FilePath scriptPath)

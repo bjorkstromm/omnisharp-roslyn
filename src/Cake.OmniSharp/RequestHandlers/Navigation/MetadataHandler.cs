@@ -7,12 +7,12 @@ using OmniSharp.Roslyn;
 
 namespace Cake.OmniSharp.RequestHandlers.Navigation
 {
-    [OmniSharpHandler(OmnisharpEndpoints.Metadata, Constants.LanguageNames.Cake)]
-    public class MetadataHandler : CakeRequestHandler<MetadataService, MetadataRequest, MetadataResponse>
+    [OmniSharpHandler(OmnisharpEndpoints.Metadata, Constants.LanguageNames.Cake), Shared]
+    public class MetadataHandler : CakeRequestHandler<MetadataRequest, MetadataResponse>
     {
         [ImportingConstructor]
-        public MetadataHandler(OmniSharpWorkspace workspace, MetadataHelper metadataHelper)
-            : base(workspace, new MetadataService(workspace, metadataHelper))
+        public MetadataHandler(OmniSharpWorkspace workspace)
+            : base(workspace)
         {
         }
     }

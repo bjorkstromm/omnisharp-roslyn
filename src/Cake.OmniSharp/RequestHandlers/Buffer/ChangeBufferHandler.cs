@@ -4,6 +4,7 @@ using OmniSharp.Mef;
 using OmniSharp.Models;
 using OmniSharp;
 using Cake.OmniSharp.Scripting;
+using Cake.OmniSharp.IO;
 
 namespace Cake.OmniSharp.RequestHandlers.Buffer
 {
@@ -12,12 +13,17 @@ namespace Cake.OmniSharp.RequestHandlers.Buffer
     {
         private readonly OmniSharpWorkspace _workspace;
         private readonly ICakeScriptGenerator _generator;
+        private readonly IBufferedFileSystem _fileSystem;
 
         [ImportingConstructor]
-        public ChangeBufferHandler(OmniSharpWorkspace workspace, ICakeScriptGenerator generator)
+        public ChangeBufferHandler(
+            OmniSharpWorkspace workspace,
+            IBufferedFileSystem fileSystem,
+            ICakeScriptGenerator generator)
         {
             _workspace = workspace;
             _generator = generator;
+            _fileSystem = fileSystem;
         }
 
         public async Task<object> Handle(ChangeBufferRequest request)
@@ -28,15 +34,16 @@ namespace Cake.OmniSharp.RequestHandlers.Buffer
             }
 
             var documentIds = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(request.FileName);
-            if (!documentIds.IsEmpty)
+            if (documentIds.IsEmpty)
             {
+                _fileSystem.AddOrUpdateFile(request.FileName, request.NewText);
+            }
 
-            }
-            else
-            {
-                var script = _generator.Generate(request.FileName);
-                request.NewText = script.ToString();
-            }
+            var script = _generator.Generate(request.FileName);
+
+            var offset = script.GetLineDirectivePosition(request.FileName) + 1;
+            request.StartLine += offset;
+            request.EndLine += offset;
 
             await _workspace.BufferManager.UpdateBuffer(request);
             return true;

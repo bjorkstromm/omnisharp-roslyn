@@ -6,22 +6,22 @@ using OmniSharp.Roslyn.CSharp.Services.Navigation;
 
 namespace Cake.OmniSharp.RequestHandlers.Navigation
 {
-    [OmniSharpHandler(OmnisharpEndpoints.NavigateUp, Constants.LanguageNames.Cake)]
-    public class NavigateUpHandler : CakeRequestHandler<NavigateUpService, NavigateUpRequest, NavigateResponse>
+    [OmniSharpHandler(OmnisharpEndpoints.NavigateUp, Constants.LanguageNames.Cake), Shared]
+    public class NavigateUpHandler : CakeRequestHandler<NavigateUpRequest, NavigateResponse>
     {
         [ImportingConstructor]
         public NavigateUpHandler(OmniSharpWorkspace workspace)
-            : base(workspace, new NavigateUpService(workspace))
+            : base(workspace)
         {
         }
     }
 
-    [OmniSharpHandler(OmnisharpEndpoints.NavigateDown, Constants.LanguageNames.Cake)]
-    public class NavigateDownHandler : CakeRequestHandler<NavigateDownService, NavigateDownRequest, NavigateResponse>
+    [OmniSharpHandler(OmnisharpEndpoints.NavigateDown, Constants.LanguageNames.Cake), Shared]
+    public class NavigateDownHandler : CakeRequestHandler<NavigateDownRequest, NavigateResponse>
     {
         [ImportingConstructor]
         public NavigateDownHandler(OmniSharpWorkspace workspace)
-            : base(workspace, new NavigateDownService(workspace))
+            : base(workspace)
         {
         }
     }

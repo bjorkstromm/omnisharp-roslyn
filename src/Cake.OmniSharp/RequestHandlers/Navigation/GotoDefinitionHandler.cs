@@ -8,14 +8,14 @@ using OmniSharp.Roslyn;
 
 namespace Cake.OmniSharp.RequestHandlers.Navigation
 {
-    [OmniSharpHandler(OmnisharpEndpoints.GotoDefinition, Constants.LanguageNames.Cake)]
-    public class GotoDefinitionHandler : CakeRequestHandler<GotoDefinitionService, GotoDefinitionRequest, GotoDefinitionResponse>
+    [OmniSharpHandler(OmnisharpEndpoints.GotoDefinition, Constants.LanguageNames.Cake), Shared]
+    public class GotoDefinitionHandler : CakeRequestHandler<GotoDefinitionRequest, GotoDefinitionResponse>
     {
         [ImportingConstructor]
         public GotoDefinitionHandler(
             OmniSharpWorkspace workspace,
             MetadataHelper metadataHelper)
-            : base(workspace, new GotoDefinitionService(workspace, metadataHelper))
+            : base(workspace)
         {
         }
     }
