@@ -58,33 +58,6 @@ namespace Cake.OmniSharp
             _projects = new Dictionary<string, ProjectInfo>();
             _documentChecksums = new ConcurrentDictionary<DocumentId, ImmutableArray<byte>>();
             _generator = generator;
-
-            _workspace.WorkspaceChanged += _workspace_WorkspaceChanged;
-        }
-
-        private void _workspace_WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
-        {
-            if(e.Kind == WorkspaceChangeKind.DocumentChanged)
-            {
-                _logger.LogDebug($"Document {e.DocumentId} changed");
-                var document = _workspace.CurrentSolution.GetDocument(e.DocumentId);
-                var sourceText = document.GetTextAsync().GetAwaiter().GetResult();
-
-                if(_documentChecksums.TryGetValue(e.DocumentId, out ImmutableArray<byte> sum) && sum == sourceText.GetChecksum())
-                {
-                    return;
-                }
-
-                var script = _generator.Generate(new FilePath(document.FilePath));
-                var code = RoslynCodeGenerator.Generate(script.Script, sourceText.ToString());
-
-                sourceText = SourceText.From(code);
-
-                var checksum = sourceText.GetChecksum();
-                _documentChecksums.AddOrUpdate(e.DocumentId, checksum, (k, o) => checksum);
-
-                _workspace.OnDocumentChanged(e.DocumentId, sourceText);
-            }
         }
 
         public Task<object> GetProjectModelAsync(string filePath)

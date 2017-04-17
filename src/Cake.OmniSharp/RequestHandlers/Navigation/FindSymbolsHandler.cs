@@ -1,5 +1,6 @@
 using System.Composition;
 using System.Threading.Tasks;
+using Cake.OmniSharp.Extensions;
 using OmniSharp.Mef;
 using OmniSharp.Models;
 using OmniSharp;
@@ -14,6 +15,11 @@ namespace Cake.OmniSharp.RequestHandlers.Navigation
         public FindSymbolsHandler(OmniSharpWorkspace workspace)
             : base(workspace)
         {
+        }
+
+        protected override Task<QuickFixResponse> TranslateResponse(QuickFixResponse response, FindSymbolsRequest request)
+        {
+            return response.TranslateAsync(Workspace);
         }
     }
 }

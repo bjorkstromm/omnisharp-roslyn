@@ -1,5 +1,6 @@
 using System.Composition;
 using System.Threading.Tasks;
+using Cake.OmniSharp.Extensions;
 using OmniSharp.Mef;
 using OmniSharp.Models;
 using OmniSharp;
@@ -13,10 +14,14 @@ namespace Cake.OmniSharp.RequestHandlers.Navigation
     {
         [ImportingConstructor]
         public GotoDefinitionHandler(
-            OmniSharpWorkspace workspace,
-            MetadataHelper metadataHelper)
+            OmniSharpWorkspace workspace)
             : base(workspace)
         {
+        }
+
+        protected override Task<GotoDefinitionResponse> TranslateResponse(GotoDefinitionResponse response, GotoDefinitionRequest request)
+        {
+            return response.TranslateAsync(Workspace);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Cake.OmniSharp.RequestHandlers.Diagnostics
         [ImportingConstructor]
         public CodeCheckHandler(
             OmniSharpWorkspace workspace)
-            : base(workspace, false)
+            : base(workspace)
         {
         }
     }

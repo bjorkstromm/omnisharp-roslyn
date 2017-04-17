@@ -5,7 +5,9 @@ using System.Composition;
 using OmniSharp.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using OmniSharp.Abstractions.Services;
+using Cake.OmniSharp.Extensions;
 
 namespace Cake.OmniSharp.RequestHandlers.Structure
 {
@@ -17,6 +19,11 @@ namespace Cake.OmniSharp.RequestHandlers.Structure
             OmniSharpWorkspace workspace) 
             : base(workspace)
         {
+        }
+
+        protected override Task<FileMemberTree> TranslateResponse(FileMemberTree response, MembersTreeRequest request)
+        {
+            return response.TranslateAsync(Workspace, request);
         }
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using System.Composition.Hosting;
 using OmniSharp.Models;
 using Cake.Core.IO;
+using Cake.OmniSharp.Extensions;
 
 namespace Cake.OmniSharp.RequestHandlers
 {
@@ -32,12 +33,10 @@ namespace Cake.OmniSharp.RequestHandlers
 
         [ImportMany]
         public IEnumerable<Lazy<IRequestHandler, OmniSharpLanguage>> Handlers { get; set; }
-        public OmniSharpWorkspace Workspace { get; private set; }
-        public Lazy<RequestHandler<TRequest, TResponse>> Service { get; private set; }
+        public OmniSharpWorkspace Workspace { get; }
+        public Lazy<RequestHandler<TRequest, TResponse>> Service { get; }
 
-        private bool _translateResponse;
-
-        protected CakeRequestHandler(OmniSharpWorkspace workspace, bool translateResponse = true)
+        protected CakeRequestHandler(OmniSharpWorkspace workspace)
         {
             Workspace = workspace;
             Service = new Lazy<RequestHandler<TRequest, TResponse>>(() =>
@@ -47,11 +46,9 @@ namespace Cake.OmniSharp.RequestHandlers
                     s.Metadata.Language.Equals(LanguageNames.CSharp, StringComparison.Ordinal))?.Value 
                     as RequestHandler<TRequest, TResponse>;
             });
-
-            _translateResponse = translateResponse;
         }
 
-        public virtual async Task<TResponse> Handle(TRequest req)
+        public virtual async Task<TResponse> Handle(TRequest request)
         {
             var service = Service.Value;
             if(service == null)
@@ -59,43 +56,30 @@ namespace Cake.OmniSharp.RequestHandlers
                 throw new NotSupportedException();
             }
 
-            // Translate if possible
-            int offset = 0;
+            request = await TranslateRequestAsync(request);
+
+            var response = await service.Handle(request);
+
+            return await TranslateResponse(response, request);
+        }
+
+        protected virtual async Task<TRequest> TranslateRequestAsync(TRequest req)
+        {
             var request = req as Request;
-            if (request != null)
+
+            if (request == null)
             {
-                if (request.FileName == null)
-                {
-                    return default(TResponse);
-                }
-
-                var document = Workspace.GetDocument(request.FileName);
-                if (document == null)
-                {
-                    return default(TResponse);
-                }
-
-                var filePath = new FilePath(request.FileName);
-                var sourceText = await document.GetTextAsync();
-
-                offset = sourceText.Lines.FirstOrDefault(line => line.ToString().Equals($"#line 1 \"{filePath.FullPath}\"")).LineNumber + 1;
-
-                request.Line += offset;
+                return req;
             }
 
-            var res = await service.Handle(req);
+            request = await request.TranslateAsync(Workspace);
 
-            if(_translateResponse && res is QuickFixResponse)
-            {
-                var response = res as QuickFixResponse;
+            return req;
+        }
 
-                foreach(var fix in response.QuickFixes)
-                {
-                    fix.Line -= offset;
-                }
-            }
-
-            return res;
+        protected virtual Task<TResponse> TranslateResponse(TResponse response, TRequest request)
+        {
+            return Task.FromResult(response);
         }
     }
 }
