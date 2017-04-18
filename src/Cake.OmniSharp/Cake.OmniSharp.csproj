@@ -11,11 +11,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OmniSharp.Abstractions\OmniSharp.Abstractions.csproj" />
-    <ProjectReference Include="..\OmniSharp.Roslyn.CSharp\OmniSharp.Roslyn.CSharp.csproj" />
+    <ProjectReference Include="..\OmniSharp.Roslyn\OmniSharp.Roslyn.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cake.Common" Version="0.19.1" />
     <PackageReference Include="Cake.Core" Version="0.19.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.0.0" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-1-003177" />

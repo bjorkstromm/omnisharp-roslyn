@@ -1,7 +1,6 @@
 ﻿using Cake.Core.IO;
 using Cake.Core.Scripting;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 

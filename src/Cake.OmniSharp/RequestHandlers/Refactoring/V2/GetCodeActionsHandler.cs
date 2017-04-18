@@ -1,11 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using OmniSharp;
+﻿using OmniSharp;
 using OmniSharp.Mef;
 using OmniSharp.Models.V2;
-using OmniSharp.Roslyn.CSharp.Services.CodeActions;
-using OmniSharp.Roslyn.CSharp.Services.Refactoring.V2;
-using OmniSharp.Services;
-using System.Collections.Generic;
 using System.Composition;
 
 namespace Cake.OmniSharp.RequestHandlers.Refactoring.V2

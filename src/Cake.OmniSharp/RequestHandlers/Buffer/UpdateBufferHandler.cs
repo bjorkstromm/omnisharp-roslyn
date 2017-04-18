@@ -1,5 +1,4 @@
 using System.Composition;
-using System.Linq;
 using System.Threading.Tasks;
 using OmniSharp.Mef;
 using OmniSharp.Models;

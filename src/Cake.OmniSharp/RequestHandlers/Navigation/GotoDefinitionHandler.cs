@@ -4,8 +4,6 @@ using Cake.OmniSharp.Extensions;
 using OmniSharp.Mef;
 using OmniSharp.Models;
 using OmniSharp;
-using OmniSharp.Roslyn.CSharp.Services.Navigation;
-using OmniSharp.Roslyn;
 
 namespace Cake.OmniSharp.RequestHandlers.Navigation
 {

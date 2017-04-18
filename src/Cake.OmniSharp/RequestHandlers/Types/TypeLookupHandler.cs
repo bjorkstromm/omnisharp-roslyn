@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Composition;
 using OmniSharp;
 using OmniSharp.Mef;
 using OmniSharp.Models;
-using Cake.OmniSharp.Extensions;
 
 namespace Cake.OmniSharp.RequestHandlers.Types
 {

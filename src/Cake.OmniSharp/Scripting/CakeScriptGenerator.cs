@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cake.Core;
 using Cake.Core.Scripting;
 using Cake.Core.Diagnostics;
@@ -10,7 +8,6 @@ using Cake.Core.Configuration;
 using Cake.Core.Reflection;
 using Cake.Core.Scripting.Analysis;
 using Cake.OmniSharp.Configuration;
-using Cake.OmniSharp.Scripting;
 using Cake.OmniSharp.Reflection;
 using Cake.Core.Tooling;
 using Cake.Core.IO;
@@ -35,6 +32,7 @@ namespace Cake.OmniSharp.Scripting
         private readonly IScriptProcessor _processor;
         private readonly IScriptConventions _conventions;
         private readonly IAssemblyLoader _assemblyLoader;
+        private readonly IGlobber _globber;
 
         [ImportingConstructor]
         public CakeScriptGenerator(ILoggerFactory loggerFactory, IFileSystem fileSystem)
@@ -59,15 +57,17 @@ namespace Cake.OmniSharp.Scripting
             _assemblyLoader = new AssemblyLoader(_fileSystem, assemblyVerifier);
 
             // Aliasfinder
-            _aliasFinder = new ScriptAliasFinder(_log);
+            _aliasFinder = new CakeScriptAliasFinder(_log);
 
             // Analyzer
             _analyzer = new ScriptAnalyzer(_fileSystem, _environment, _log, null);
 
+            // Globber
+            _globber = new Globber(_fileSystem, _environment);
+
             // Processor
             var toolRepository = new ToolRepository(_environment);
-            var globber = new Globber(_fileSystem, _environment);
-            var toolResolutionStrategy = new ToolResolutionStrategy(_fileSystem, _environment, globber, configuration);
+            var toolResolutionStrategy = new ToolResolutionStrategy(_fileSystem, _environment, _globber, configuration);
             var toolLocator = new ToolLocator(_environment, toolRepository, toolResolutionStrategy);
             _processor = new ScriptProcessor(_fileSystem, _environment, _log, toolLocator, new[] { new CakePackageInstaller() });
 
@@ -120,8 +120,8 @@ namespace Cake.OmniSharp.Scripting
             _processor.InstallTools(result, toolsPath);
 
             // Install addins.
-            var applicationRoot = _environment.ApplicationRoot;
-            var addinRoot = GetAddinPath(applicationRoot);
+            var cakeRoot = GetCakePath(toolsPath);
+            var addinRoot = GetAddinPath(cakeRoot);
             var addinReferences = _processor.InstallAddins(result, addinRoot);
             foreach (var addinReference in addinReferences)
             {
@@ -131,7 +131,9 @@ namespace Cake.OmniSharp.Scripting
             // Load all references.
             var metadataReferences = new HashSet<MetadataReference>();
             var assemblies = new HashSet<Assembly>();
-            assemblies.AddRange(_conventions.GetDefaultAssemblies(applicationRoot));
+
+            // TODO: Don't load Cake.Core here... Just add it as a Metadata reference...
+            assemblies.AddRange(_conventions.GetDefaultAssemblies(cakeRoot));
 
             foreach (var reference in result.References)
             {
@@ -193,7 +195,15 @@ namespace Cake.OmniSharp.Scripting
             return root.Combine("tools");
         }
 
-        private DirectoryPath GetAddinPath(DirectoryPath applicationRoot)
+        private DirectoryPath GetCakePath(DirectoryPath toolPath)
+        {
+            var pattern = string.Concat(toolPath.FullPath, "/**/Cake.Core.dll");
+            var cakeCorePath = _globber.GetFiles(pattern).FirstOrDefault();
+
+            return cakeCorePath?.GetDirectory().MakeAbsolute(_environment);
+        }
+
+        private DirectoryPath GetAddinPath(DirectoryPath cakeRoot)
         {
             var addinPath = _configuration.GetValue(Constants.Paths.Addins);
             if (!string.IsNullOrWhiteSpace(addinPath))
@@ -201,7 +211,7 @@ namespace Cake.OmniSharp.Scripting
                 return new DirectoryPath(addinPath).MakeAbsolute(_environment);
             }
 
-            return applicationRoot.Combine("../Addins").Collapse();
+            return cakeRoot.Combine("../Addins").Collapse();
         }
     }
 }

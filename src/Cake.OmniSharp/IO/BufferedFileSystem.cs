@@ -1,7 +1,6 @@
 ﻿using Cake.Core.IO;
 using System.Collections.Concurrent;
 using System.Composition;
-using System;
 
 namespace Cake.OmniSharp.IO
 {

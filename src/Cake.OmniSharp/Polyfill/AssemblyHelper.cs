@@ -5,7 +5,6 @@
 using System;
 using System.Reflection;
 using Cake.Core.IO;
-using Cake.Core.Reflection;
 using Cake.Core;
 using Cake.OmniSharp.Reflection;
 

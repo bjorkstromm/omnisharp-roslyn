@@ -1,6 +1,5 @@
 ﻿using OmniSharp;
 using System.Threading.Tasks;
-using OmniSharp.Roslyn.CSharp.Services.Structure;
 using System;
 using System.Reflection;
 using OmniSharp.Mef;
@@ -8,9 +7,7 @@ using System.Composition;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using System.Composition.Hosting;
 using OmniSharp.Models;
-using Cake.Core.IO;
 using Cake.OmniSharp.Extensions;
 
 namespace Cake.OmniSharp.RequestHandlers
