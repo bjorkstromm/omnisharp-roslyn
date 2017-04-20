@@ -57,7 +57,7 @@ namespace Cake.OmniSharp.Scripting
             _assemblyLoader = new AssemblyLoader(_fileSystem, assemblyVerifier);
 
             // Aliasfinder
-            _aliasFinder = new CakeScriptAliasFinder(_log);
+            _aliasFinder = new ScriptAliasFinder(_log);
 
             // Analyzer
             _analyzer = new ScriptAnalyzer(_fileSystem, _environment, _log, null);
@@ -133,7 +133,8 @@ namespace Cake.OmniSharp.Scripting
             var assemblies = new HashSet<Assembly>();
 
             // TODO: Don't load Cake.Core here... Just add it as a Metadata reference...
-            assemblies.AddRange(_conventions.GetDefaultAssemblies(cakeRoot));
+            //assemblies.AddRange(_conventions.GetDefaultAssemblies(cakeRoot));
+            assemblies.Add(_assemblyLoader.Load(cakeRoot.CombineWithFilePath("Cake.Common.dll"), false));
 
             foreach (var reference in result.References)
             {
@@ -167,6 +168,8 @@ namespace Cake.OmniSharp.Scripting
                 {
                     metadataReferences.Add(MetadataReference.CreateFromFile(assembly.Location));
                 }
+
+                metadataReferences.AddRange(GetDefaultReferences(_environment.ApplicationRoot));
             }
 
             // Import all namespaces.
@@ -182,6 +185,27 @@ namespace Cake.OmniSharp.Scripting
                 MetadataReferences = metadataReferences,
                 Usings = namespaces
             };
+        }
+
+        private static IEnumerable<MetadataReference> GetDefaultReferences(DirectoryPath root)
+        {
+            // Prepare the default assemblies.
+            var result = new HashSet<string>();
+            result.Add(typeof(Action).GetTypeInfo().Assembly.Location); // mscorlib or System.Private.Core
+            result.Add(typeof(IQueryable).GetTypeInfo().Assembly.Location); // System.Core or System.Linq.Expressions
+
+            // Load other Cake-related assemblies that we need.
+            result.Add(root.CombineWithFilePath("Cake.Core.dll").FullPath);
+
+#if NET46
+            result.Add(typeof(Uri).GetTypeInfo().Assembly.Location); // System
+            result.Add(typeof(System.Xml.XmlReader).GetTypeInfo().Assembly.Location); // System.Xml
+            result.Add(typeof(System.Xml.Linq.XDocument).GetTypeInfo().Assembly.Location); // System.Xml.Linq
+            result.Add(typeof(System.Data.DataTable).GetTypeInfo().Assembly.Location); // System.Data
+#endif
+
+            // Return the assemblies.
+            return result.Select(x => MetadataReference.CreateFromFile(x));
         }
 
         private DirectoryPath GetToolPath(DirectoryPath root)

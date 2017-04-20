@@ -18,22 +18,19 @@ namespace Cake.OmniSharp.Scripting
             return string.Join("\r\n", usingDirectives, aliases, code);
         }
 
-        public static string Generate(Script script, string code)
-        {
-            var usingDirectives = string.Join("\r\n", script.UsingAliasDirectives);
-            var aliases = GetAliasCode(script);
-            code = script.Lines[0] + "\r\n" + code;
-            return string.Join("\r\n", usingDirectives, aliases, code);
-        }
-
         private static string GetAliasCode(Script context)
         {
             var result = new List<string>();
+            var documentationGenerator = new DocumentationGenerator();
+
             foreach (var alias in context.Aliases)
             {
-                result.Add(alias.Type == ScriptAliasType.Method
+                //var documentation = documentationGenerator.Generate(alias);
+                var code = alias.Type == ScriptAliasType.Method
                     ? MethodAliasGenerator.Generate(alias.Method)
-                    : PropertyAliasGenerator.Generate(alias.Method));
+                    : PropertyAliasGenerator.Generate(alias.Method);
+
+                result.Add(/*documentation + "\r\n" + */code);
             }
             return string.Join("\r\n", result);
         }
