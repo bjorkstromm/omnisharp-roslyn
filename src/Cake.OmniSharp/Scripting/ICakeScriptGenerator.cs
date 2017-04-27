@@ -5,5 +5,6 @@ namespace Cake.OmniSharp.Scripting
     public interface ICakeScriptGenerator
     {
         CakeScript Generate(FilePath scriptPath);
+        CakeDocumentationProvider DocumentationProvider { get; }
     }
 }

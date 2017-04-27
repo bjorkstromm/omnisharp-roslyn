@@ -14,16 +14,19 @@ namespace Cake.OmniSharp.RequestHandlers.Buffer
         private readonly OmniSharpWorkspace _workspace;
         private readonly ICakeScriptGenerator _generator;
         private readonly IBufferedFileSystem _fileSystem;
+        private readonly CakeDocumentationProvider _documentationProvider;
 
         [ImportingConstructor]
         public UpdateBufferHandler(
             OmniSharpWorkspace workspace,
             IBufferedFileSystem fileSystem,
-            ICakeScriptGenerator generator)
+            ICakeScriptGenerator generator,
+            CakeDocumentationProvider provider)
         {
             _workspace = workspace;
             _generator = generator;
             _fileSystem = fileSystem;
+            _documentationProvider = provider;
         }
 
         public async Task<object> Handle(UpdateBufferRequest request)
@@ -45,7 +48,7 @@ namespace Cake.OmniSharp.RequestHandlers.Buffer
             }
 
             var script = _generator.Generate(request.FileName);
-            request.Buffer = script.ToString();
+            request.Buffer = script.ToString(_documentationProvider);
             var offset = script.GetLineDirectivePosition(request.FileName) + 1;
 
             if(request.Changes != null)

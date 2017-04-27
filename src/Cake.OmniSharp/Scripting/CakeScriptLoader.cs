@@ -35,7 +35,7 @@ namespace Cake.OmniSharp.Scripting
             TextAndVersion textAndVersion;
 
             var script = _generator.Generate(_filePath);
-            var code = RoslynCodeGenerator.Generate(script.Script);
+            var code = RoslynCodeGenerator.Generate(script.Script, _generator.DocumentationProvider);
             var version = VersionStamp.Create(prevLastWriteTime);
             var text = SourceText.From(code);
             textAndVersion = TextAndVersion.Create(text, version, _filePath);

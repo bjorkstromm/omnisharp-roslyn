@@ -33,9 +33,10 @@ namespace Cake.OmniSharp.Scripting
         private readonly IScriptConventions _conventions;
         private readonly IAssemblyLoader _assemblyLoader;
         private readonly IGlobber _globber;
+        private readonly CakeDocumentationProvider _documentationProvider;
 
         [ImportingConstructor]
-        public CakeScriptGenerator(ILoggerFactory loggerFactory, IFileSystem fileSystem)
+        public CakeScriptGenerator(ILoggerFactory loggerFactory, IFileSystem fileSystem, CakeDocumentationProvider documentationProvider)
         {
             // Log
             _log = new CakeLog(loggerFactory.CreateLogger<CakeProjectSystem>());
@@ -73,28 +74,8 @@ namespace Cake.OmniSharp.Scripting
 
             // Conventions
             _conventions = new ScriptConventions(_fileSystem, _assemblyLoader, _log);
-        }
 
-        public CakeScriptGenerator(
-            IFileSystem fileSystem,
-            ICakeEnvironment environment,
-            ICakeLog log,
-            ICakeConfiguration configuration,
-            IScriptAliasFinder aliasFinder,
-            IScriptAnalyzer analyzer,
-            IScriptProcessor processor,
-            IScriptConventions conventions,
-            IAssemblyLoader assemblyLoader)
-        {
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _aliasFinder = aliasFinder ?? throw new ArgumentNullException(nameof(aliasFinder));
-            _analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
-            _processor = processor ?? throw new ArgumentNullException(nameof(processor));
-            _conventions = conventions ?? throw new ArgumentNullException(nameof(conventions));
-            _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
+            _documentationProvider = documentationProvider;
         }
 
         public CakeScript Generate(FilePath scriptPath)
@@ -147,7 +128,8 @@ namespace Cake.OmniSharp.Scripting
                 else
                 {
                     // Add the metadatareference
-                    metadataReferences.Add(MetadataReference.CreateFromFile(referencePath.MakeAbsolute(_environment).ToString()));
+                    var referenceFullPath = referencePath.MakeAbsolute(_environment).FullPath;
+                    metadataReferences.Add(MetadataReference.CreateFromFile(referenceFullPath, documentation: CreateDocumentationProvider(referenceFullPath)));
                 }
             }
 
@@ -166,7 +148,9 @@ namespace Cake.OmniSharp.Scripting
                 // Add assembly references to the session.
                 foreach (var assembly in assemblies)
                 {
-                    metadataReferences.Add(MetadataReference.CreateFromFile(assembly.Location));
+                    metadataReferences.Add(MetadataReference.CreateFromFile(assembly.Location, documentation: CreateDocumentationProvider(assembly.Location)));
+
+                    _documentationProvider.AddDocumentation(assembly.Location);
                 }
 
                 metadataReferences.AddRange(GetDefaultReferences(_environment.ApplicationRoot));
@@ -183,11 +167,25 @@ namespace Cake.OmniSharp.Scripting
             {
                 Script = new Script(result.Namespaces, result.Lines, aliases, result.UsingAliases),
                 MetadataReferences = metadataReferences,
-                Usings = namespaces
+                Usings = namespaces,
             };
         }
 
-        private static IEnumerable<MetadataReference> GetDefaultReferences(DirectoryPath root)
+        public CakeDocumentationProvider DocumentationProvider => _documentationProvider;
+
+        private DocumentationProvider CreateDocumentationProvider(string assemblyLocation)
+        {
+            var documentationPath = new FilePath(assemblyLocation).ChangeExtension("xml");
+
+            if (_fileSystem.Exist(documentationPath))
+            {
+                return XmlDocumentationProvider.CreateFromFile(documentationPath.FullPath);
+            }
+
+            return Microsoft.CodeAnalysis.DocumentationProvider.Default;
+        }
+
+        private IEnumerable<MetadataReference> GetDefaultReferences(DirectoryPath root)
         {
             // Prepare the default assemblies.
             var result = new HashSet<string>();
@@ -205,7 +203,11 @@ namespace Cake.OmniSharp.Scripting
 #endif
 
             // Return the assemblies.
-            return result.Select(x => MetadataReference.CreateFromFile(x));
+            return result.Select(assemblyLocation =>
+            {
+                _documentationProvider.AddDocumentation(assemblyLocation);
+                return MetadataReference.CreateFromFile(assemblyLocation, documentation: CreateDocumentationProvider(assemblyLocation));
+            });
         }
 
         private DirectoryPath GetToolPath(DirectoryPath root)

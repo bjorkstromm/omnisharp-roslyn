@@ -14,9 +14,9 @@ namespace Cake.OmniSharp.Scripting
 
         public IEnumerable<string> Usings { get; set; }
 
-        public override string ToString()
+        public string ToString(CakeDocumentationProvider provider)
         {
-            return RoslynCodeGenerator.Generate(Script);
+            return RoslynCodeGenerator.Generate(Script, provider);
         }
 
         public int GetLineDirectivePosition(FilePath filePath)
