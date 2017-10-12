@@ -1,12 +1,13 @@
 ﻿using System;
+using OmniSharp.Models.V2;
 
 namespace OmniSharp.FileWatching
 {
     // TODO: Flesh out this API more
     public interface IFileSystemWatcher
     {
-        void Watch(string path, Action<string> callback);
+        void Watch(string pattern, Action<FileChangedRequest> callback);
 
-        void TriggerChange(string path);
+        void TriggerChange(FileChangedRequest request);
     }
 }

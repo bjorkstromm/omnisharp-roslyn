@@ -55,8 +55,13 @@ namespace OmniSharp
 
             config = config.WithAssemblies(assemblies);
 
-            var fileSystemWatcher = new ManualFileSystemWatcher();
+            var fileSystemWatcher = new ManualFileSystemWatcher(_environment);
             var metadataHelper = new MetadataHelper(assemblyLoader);
+
+            fileSystemWatcher.Watch("./**/*.cake", (req) =>
+            {
+                Console.WriteLine($"{req.FileName} {req.Action}");
+            });
 
             config = config
                 .WithProvider(MefValueProvider.From(_serviceProvider))

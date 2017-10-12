@@ -47,6 +47,7 @@ namespace OmniSharp
         {
             public const string GetCodeActions = "/v2/getcodeactions";
             public const string RunCodeAction = "/v2/runcodeaction";
+            public const string FilesChanged = "/v2/filesChanged";
 
             public const string GetTestStartInfo = "/v2/getteststartinfo";
             public const string RunTest = "/v2/runtest";

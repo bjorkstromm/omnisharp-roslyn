@@ -5,7 +5,8 @@ using Microsoft.CodeAnalysis;
 using OmniSharp.FileWatching;
 using OmniSharp.Mef;
 using OmniSharp.Models;
-using OmniSharp.Models.FilesChanged;
+using OmniSharp.Models.V2;
+using FilesChangedResponse = OmniSharp.Models.FilesChanged.FilesChangedResponse;
 
 namespace OmniSharp.Roslyn.CSharp.Services.Files
 {
@@ -24,7 +25,10 @@ namespace OmniSharp.Roslyn.CSharp.Services.Files
         {
             foreach (var request in requests)
             {
-                _watcher.TriggerChange(request.FileName);
+                _watcher.TriggerChange(new FileChangedRequest {
+                    FileName = request.FileName,
+                    Action = FileChangedAction.Unknown
+                });
             }
             return Task.FromResult(new FilesChangedResponse());
         }
