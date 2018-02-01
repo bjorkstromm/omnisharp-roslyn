@@ -44,6 +44,7 @@
     <NuGetPackagingCoreVersion>4.3.0</NuGetPackagingCoreVersion>
     <NuGetProjectModelVersion>4.3.0</NuGetProjectModelVersion>
     <NuGetVersioningVersion>4.3.0</NuGetVersioningVersion>
+	<OmniSharpExtensionsLanguageServerVersion>0.7.6</OmniSharpExtensionsLanguageServerVersion>
     <SystemCollectionsImmutableVersion>1.4.0</SystemCollectionsImmutableVersion>
     <SystemCompositionVersion>1.0.31</SystemCompositionVersion>
     <SystemReflectionMetadataVersion>1.4.2</SystemReflectionMetadataVersion>

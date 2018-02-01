@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using OmniSharp.Extensions.JsonRpc;
-using OmniSharp.Extensions.LanguageServer;
+using OmniSharp.Extensions.LanguageServer.Server;
 
 namespace OmniSharp.LanguageServerProtocol
 {

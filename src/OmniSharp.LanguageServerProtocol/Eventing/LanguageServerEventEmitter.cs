@@ -1,15 +1,10 @@
-using System;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using OmniSharp.Eventing;
-using OmniSharp.Extensions.LanguageServer;
-using OmniSharp.Extensions.LanguageServer.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using OmniSharp.Extensions.LanguageServer.Server;
 using OmniSharp.Models.Diagnostics;
 using OmniSharp.Models.Events;
-using OmniSharp.Stdio.Protocol;
-using OmniSharp.Stdio.Services;
 
 namespace OmniSharp.LanguageServerProtocol.Eventing
 {
