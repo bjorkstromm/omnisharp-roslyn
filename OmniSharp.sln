@@ -69,9 +69,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.Stdio.Driver", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.Script.Tests", "tests\OmniSharp.Script.Tests\OmniSharp.Script.Tests.csproj", "{9E4BA68C-7F4B-429A-A0C7-8CE7D41D610F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniSharp.MiscellaneousFiles", "src\OmniSharp.MiscellaneousFiles\OmniSharp.MiscellaneousFiles.csproj", "{49358F28-883B-4FA0-B853-8774A732E188}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.MiscellaneousFiles", "src\OmniSharp.MiscellaneousFiles\OmniSharp.MiscellaneousFiles.csproj", "{49358F28-883B-4FA0-B853-8774A732E188}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniSharp.MiscellaneousFiles.Tests", "tests\OmniSharp.MiscellaneousFiles.Tests\OmniSharp.MiscellaneousFiles.Tests.csproj", "{51F1D224-A543-48C5-BD37-139B935E71D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.MiscellaneousFiles.Tests", "tests\OmniSharp.MiscellaneousFiles.Tests\OmniSharp.MiscellaneousFiles.Tests.csproj", "{51F1D224-A543-48C5-BD37-139B935E71D8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.WebSocket.Driver", "src\OmniSharp.WebSocket.Driver\OmniSharp.WebSocket.Driver.csproj", "{D16960E8-89A8-4AD3-B40B-881192B67B65}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniSharp.WebSocket", "src\OmniSharp.WebSocket\OmniSharp.WebSocket.csproj", "{D0989BF4-DFED-49EF-B31B-367CA65BF012}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -419,6 +423,30 @@ Global
 		{51F1D224-A543-48C5-BD37-139B935E71D8}.Release|x64.Build.0 = Release|Any CPU
 		{51F1D224-A543-48C5-BD37-139B935E71D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{51F1D224-A543-48C5-BD37-139B935E71D8}.Release|x86.Build.0 = Release|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Debug|x64.Build.0 = Debug|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Debug|x86.Build.0 = Debug|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Release|x64.ActiveCfg = Release|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Release|x64.Build.0 = Release|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Release|x86.ActiveCfg = Release|Any CPU
+		{D16960E8-89A8-4AD3-B40B-881192B67B65}.Release|x86.Build.0 = Release|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Debug|x64.Build.0 = Debug|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Debug|x86.Build.0 = Debug|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Release|x64.ActiveCfg = Release|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Release|x64.Build.0 = Release|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Release|x86.ActiveCfg = Release|Any CPU
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -452,6 +480,8 @@ Global
 		{9E4BA68C-7F4B-429A-A0C7-8CE7D41D610F} = {35E025BF-BBB2-4FAC-9F4B-37CBA083EE47}
 		{49358F28-883B-4FA0-B853-8774A732E188} = {2C348365-A9D8-459E-9276-56FC46AAEE31}
 		{51F1D224-A543-48C5-BD37-139B935E71D8} = {35E025BF-BBB2-4FAC-9F4B-37CBA083EE47}
+		{D16960E8-89A8-4AD3-B40B-881192B67B65} = {2C348365-A9D8-459E-9276-56FC46AAEE31}
+		{D0989BF4-DFED-49EF-B31B-367CA65BF012} = {2C348365-A9D8-459E-9276-56FC46AAEE31}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4DD725CE-B49A-4151-8B77-BB33FE88E46E}

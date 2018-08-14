@@ -15,7 +15,8 @@
   "MonoMSBuildLib": "Microsoft.Build.Lib.Mono-5.12.0.301.zip",
   "HostProjects": [
     "OmniSharp.Stdio.Driver",
-    "OmniSharp.Http.Driver"
+    "OmniSharp.Http.Driver",
+	"OmniSharp.WebSocket.Driver"
   ],
   "TestProjects": [
     "OmniSharp.MSBuild.Tests",
