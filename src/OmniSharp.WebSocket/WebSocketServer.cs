@@ -15,11 +15,17 @@ namespace OmniSharp.WebSocket
         public Stream Input { get; } = new MemoryStream();
         public Stream Output { get; } = new MemoryStream();
 
+        public void OnConnected(Action onConnected)
+        {
+            _onConnected = onConnected;
+        }
+
         private readonly string _listenerPrefix;
+        private Action _onConnected;
 
         public WebSocketServer(int serverPort, string serverInterface)
         {
-            _listenerPrefix = $"http://{serverInterface}:{serverPort}";
+            _listenerPrefix = $"http://{serverInterface}:{serverPort}/";
         }
 
         public async Task Start(CancellationToken cancellationToken)
@@ -51,7 +57,7 @@ namespace OmniSharp.WebSocket
             WebSocketContext webSocketContext;
             try
             {
-                webSocketContext = await listenerContext.AcceptWebSocketAsync("lsp");
+                webSocketContext = await listenerContext.AcceptWebSocketAsync(null);
             }
             catch (WebSocketException)
             {
@@ -59,6 +65,8 @@ namespace OmniSharp.WebSocket
                 listenerContext.Response.Close();
                 return;
             }
+
+            _onConnected();
 
             using (var webSocket = webSocketContext.WebSocket)
             {
@@ -110,7 +118,11 @@ namespace OmniSharp.WebSocket
                         }
 
                         var array = receiveStream.ToArray();
-                        await webSocket.SendAsync(new ArraySegment<byte>(array), WebSocketMessageType.Text, true, cancellationToken);
+
+                        if (array.Length > 0)
+                        {
+                            await webSocket.SendAsync(new ArraySegment<byte>(array), WebSocketMessageType.Text, true, cancellationToken);
+                        }
                     }
                 }
             }

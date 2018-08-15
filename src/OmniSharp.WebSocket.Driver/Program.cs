@@ -18,18 +18,22 @@ namespace OmniSharp.WebSocket.Driver
                     application.Port,
                     application.Interface))
                 {
-                    server.Start(cancellation.Token).ConfigureAwait(false);
-                    using (var host = new LanguageServerHost(
-                        server.Input,
-                        server.Output,
-                        application,
-                        cancellation))
+                    server.OnConnected(async () =>
                     {
-                        host.Start().Wait();
-                        cancellation.Token.WaitHandle.WaitOne();
-                    }
+                        using (var host = new LanguageServerHost(
+                            server.Input,
+                            server.Output,
+                            application,
+                            cancellation))
+                        {
+                            await host.Start();
+                            cancellation.Token.WaitHandle.WaitOne();
+                        }
+                    });
+
+                    server.Start(cancellation.Token).Wait(CancellationToken.None);
+                    cancellation.Token.WaitHandle.WaitOne();
                 }
-                
 
                 return 0;
             });
