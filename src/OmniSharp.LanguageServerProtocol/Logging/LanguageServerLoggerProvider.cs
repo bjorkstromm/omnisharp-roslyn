@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 using OmniSharp.Extensions.LanguageServer;
+using OmniSharp.Extensions.LanguageServer.Server;
 using OmniSharp.Stdio.Services;
 
 namespace OmniSharp.LanguageServerProtocol.Logging
