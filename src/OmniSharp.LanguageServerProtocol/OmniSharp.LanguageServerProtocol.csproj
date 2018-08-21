@@ -9,8 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="OmniSharp.Extensions.LanguageProtocol" Version="0.8.0" />
-        <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.8.0" />
+        <!--<PackageReference Include="OmniSharp.Extensions.LanguageProtocol" Version="0.8.0" />
+        <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.8.0" />-->
+        <ProjectReference Include="..\..\..\csharp-language-server-protocol\src\Server\Server.csproj" />
+        <ProjectReference Include="..\..\..\csharp-language-server-protocol\src\Protocol\Protocol.csproj" />
+        <ProjectReference Include="..\..\..\csharp-language-server-protocol\src\JsonRpc\JsonRpc.csproj" />
+
         <ProjectReference Include="..\OmniSharp.Host\OmniSharp.Host.csproj" />
         <ProjectReference Include="..\OmniSharp.Roslyn.CSharp\OmniSharp.Roslyn.CSharp.csproj" />
         <ProjectReference Include="..\OmniSharp.DotNet\OmniSharp.DotNet.csproj" />

@@ -75,7 +75,7 @@ namespace OmniSharp.LanguageServerProtocol
         private void CreateCompositionHost(InitializeParams initializeParams)
         {
             _environment = new OmniSharpEnvironment(
-                Helpers.FromUri(initializeParams.RootUri),
+                initializeParams.RootUri != null ? Helpers.FromUri(initializeParams.RootUri) : null,
                 Convert.ToInt32(initializeParams.ProcessId ?? -1L),
                 GetLogLevel(initializeParams.Trace),
                 _application.OtherArgs.ToArray());
