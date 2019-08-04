@@ -85,7 +85,7 @@ namespace OmniSharp.LanguageServerProtocol
                 Helpers.FromUri(initializeParams.RootUri),
                 Convert.ToInt32(initializeParams.ProcessId ?? -1L),
                 GetLogLevel(initializeParams.Trace),
-                _application.OtherArgs.ToArray());
+                _application.OtherArgs?.ToArray() ?? Array.Empty<string>());
 
             var configurationRoot = new ConfigurationBuilder(_environment).Build();
             _eventEmitter = new LanguageServerEventEmitter();
