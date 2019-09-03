@@ -101,6 +101,10 @@ namespace OmniSharp.LanguageServerProtocol.Handlers
                 Changes = changes
             });
 
+            var text = await _workspace.GetDocument(Helpers.FromUri(notification.TextDocument.Uri)).GetTextAsync();
+
+            System.IO.File.WriteAllText(DateTime.UtcNow.ToString("yyyyMMdd-HHmmssfff"), text.ToString());
+
             return Unit.Value;
         }
 
