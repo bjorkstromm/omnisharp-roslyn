@@ -347,7 +347,7 @@ public partial class MyClass
             Assert.DoesNotContain("ProbabilityManager", symbols);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/roslyn/issues/63375")]
+        [Fact]
         public async Task SymbolsReturnedForGeneratedTypes()
         {
             const string Source = @"
